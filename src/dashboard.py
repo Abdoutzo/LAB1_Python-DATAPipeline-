@@ -1,7 +1,9 @@
 import csv
+from datetime import datetime
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 
 PROCESSED_DIR = Path("data/processed")
@@ -55,7 +57,7 @@ def main():
 
     # Plot 2: daily average rating over time
     daily_rows.sort(key=lambda r: r["date"])
-    dates = [r["date"] for r in daily_rows]
+    dates = [datetime.fromisoformat(r["date"]) for r in daily_rows if r.get("date")]
     daily_avg = [r["daily_avg_rating"] or 0 for r in daily_rows]
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 9))
@@ -74,6 +76,8 @@ def main():
     ax2.set_xlabel("Date")
     ax2.set_ylabel("Average Rating")
     ax2.set_ylim(0, 5)
+    ax2.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+    ax2.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
     ax2.tick_params(axis="x", labelrotation=45)
 
     fig.tight_layout()
