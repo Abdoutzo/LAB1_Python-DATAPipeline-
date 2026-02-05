@@ -1,0 +1,31 @@
+app_id,app_name,reviews_count,avg_rating,low_rating_pct,first_review_date,last_review_date
+com.feraset.ainote,AI Note Taker - Meeting Notes,75,3.5067,36.0,2024-08-31,2026-01-21
+com.artmvstd.voiceTranscriber,"AI Note Taking, Memo: NoteHive",5,3.8,20.0,2025-06-11,2025-12-13
+com.meetgeek.assistant,AI Transcribe. Speech to Text,70,3.8429,25.71,2023-12-08,2026-02-02
+app.coconote,Coconote - AI Note Taker,163,3.8282,26.38,2025-04-24,2026-02-04
+com.joyolabs.noteify,CraftNote – AI Note Taker,200,4.47,8.5,2026-01-06,2026-02-04
+ai.fireflies.mobile,Fireflies: AI notetaker,200,3.905,23.5,2025-03-27,2026-02-01
+ai.note.notepad.memo.journal.freenote,Freenotes - Notes Taking & PDF,200,4.725,4.5,2026-01-18,2026-02-04
+com.goodnotes.android.app,"Goodnotes: AI Notes, Docs, PDF",200,2.42,58.5,2025-12-14,2026-02-04
+com.google.android.apps.labs.language.tailwind,Google NotebookLM,200,4.48,9.0,2026-01-31,2026-02-04
+com.recordpro.audiorecord,HiNoter - AI Note Taker,29,3.8966,17.24,2025-09-09,2026-01-31
+ai.notes.notebook,HyNote: AI Notebook LLM Notes,200,3.965,19.5,2025-01-21,2026-02-02
+ai.krisp.krispMobile,Krisp AI Meeting Note Taker,63,2.5397,61.9,2025-05-16,2026-01-20
+ai.meeting.app,Meeting.ai: AI Visual Notes,128,4.3672,13.28,2024-07-02,2026-02-04
+com.microsoft.office.onenote,Microsoft OneNote: Save Notes,200,3.615,28.0,2026-01-22,2026-02-04
+com.myscript.nebo,MyScript Notes (Nebo),200,3.24,38.0,2025-11-01,2026-02-04
+com.hubx.noteai,Note AI: Smart Note Taker,200,3.77,27.0,2025-07-19,2026-02-04
+voice.recorder.note.ai.transcriber,Note AI: Voice AI Transcribe,21,3.7143,23.81,2025-06-10,2026-01-21
+com.sota.ainotex,NoteX: AI Notes & Meetings,106,3.6698,28.3,2024-11-05,2026-02-02
+com.yygg.note.app,"Notewise - AI Notes, PDF, Docs",200,3.76,25.0,2025-12-11,2026-02-04
+notion.id,"Notion: Notes, Tasks, AI",200,3.92,21.0,2026-01-18,2026-02-04
+com.aisense.otter,OtterAI Transcribe Voice Notes,200,2.655,55.0,2025-09-12,2026-02-02
+com.hmd.quickrecorder,Owll: Al Note Taker Assistant,25,2.88,52.0,2025-02-07,2026-01-22
+ai.plaud.android.plaud,Plaud: AI Note Taker,200,4.275,14.5,2025-11-04,2026-02-04
+com.codespaceapps.meetingtranscriber,Smart Noter - AI Note Taker,200,3.67,28.5,2025-11-09,2026-02-04
+com.studocu.app,Studocu: AI Notes & Summaries,200,4.47,8.0,2025-11-25,2026-02-04
+io.labhouse.audioapp,Summary - AI Note Taker,200,4.18,15.5,2026-01-19,2026-02-04
+com.tomo.ai.notes,TNote: AI Note Taker & Meeting,63,3.3492,38.1,2025-03-13,2025-11-18
+ai.turbolearn,Turbo AI - Notetaker,200,4.44,10.0,2026-01-31,2026-02-04
+com.ma.waveapp,Wave AI Note Taker & Recorder,200,3.38,37.0,2025-03-24,2026-02-04
+com.imemoapp,iMemo AI Note Taker Transcribe,11,4.7273,9.09,2024-12-27,2025-10-12
