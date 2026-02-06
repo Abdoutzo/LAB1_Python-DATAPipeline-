@@ -35,6 +35,7 @@ def compute_app_kpis(rows):
         app_name = r.get("app_name")
         score = r.get("score")
         thumbs_up = r.get("thumbsUpCount")
+        content = r.get("content") or ""
         at = parse_ts(r.get("at"))
 
         if app_id not in stats:
@@ -48,6 +49,8 @@ def compute_app_kpis(rows):
                 "last_review_date": None,
                 "thumbs_up_list": [],
                 "total_thumbs_up": 0,
+                "review_lengths": [],
+                "empty_review_count": 0,
             }
 
         s = stats[app_id]
@@ -69,6 +72,12 @@ def compute_app_kpis(rows):
         except Exception:
             s["thumbs_up_list"].append(0)
 
+        # Track review quality
+        content_length = len(content.strip())
+        s["review_lengths"].append(content_length)
+        if content_length == 0:
+            s["empty_review_count"] += 1
+
         if at:
             if s["first_review_date"] is None or at < s["first_review_date"]:
                 s["first_review_date"] = at
@@ -86,6 +95,10 @@ def compute_app_kpis(rows):
         median_thumbs = sorted(thumbs_list)[len(thumbs_list) // 2] if thumbs_list else 0
         avg_thumbs = s["total_thumbs_up"] / count if count else 0
         
+        # Calculate quality metrics
+        avg_review_length = sum(s["review_lengths"]) / len(s["review_lengths"]) if s["review_lengths"] else 0
+        empty_review_pct = (s["empty_review_count"] / count) * 100 if count else 0
+        
         out_rows.append(
             {
                 "app_id": app_id,
@@ -102,6 +115,8 @@ def compute_app_kpis(rows):
                 "total_thumbs_up": s["total_thumbs_up"],
                 "avg_thumbs_up": round(avg_thumbs, 2),
                 "median_thumbs_up": median_thumbs,
+                "avg_review_length": round(avg_review_length, 1),
+                "empty_review_pct": round(empty_review_pct, 2),
             }
         )
 
@@ -166,6 +181,8 @@ def main():
             "total_thumbs_up",
             "avg_thumbs_up",
             "median_thumbs_up",
+            "avg_review_length",
+            "empty_review_pct",
         ],
     )
     write_csv(
