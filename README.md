@@ -65,3 +65,9 @@ python src/dashboard.py
 - The raw files are kept untouched to preserve lineage and reproducibility.
 - The cleaned tables are designed to be joinable (`appId` / `app_id`) and analytics‑ready.
 - The KPI layer answers the lab questions: best/worst apps, trend over time, and review volume.
+
+## Feedback
+- You might want to look at pagination for your reviews so you can get more data.
+- If you do so, writing with append in the loop is always better to prevent data loss if code crashes
+- Computing the KPIs is a bit too complicated, you can use pandas aggregations, which will optimize the code significantly
+- Please add screenshots of your dashboard to the readme file
