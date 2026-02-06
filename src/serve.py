@@ -34,6 +34,7 @@ def compute_app_kpis(rows):
         app_id = r.get("app_id")
         app_name = r.get("app_name")
         score = r.get("score")
+        thumbs_up = r.get("thumbsUpCount")
         at = parse_ts(r.get("at"))
 
         if app_id not in stats:
@@ -45,6 +46,8 @@ def compute_app_kpis(rows):
                 "low_count": 0,
                 "first_review_date": None,
                 "last_review_date": None,
+                "thumbs_up_list": [],
+                "total_thumbs_up": 0,
             }
 
         s = stats[app_id]
@@ -58,6 +61,14 @@ def compute_app_kpis(rows):
         except Exception:
             pass
 
+        # Track thumbs up engagement
+        try:
+            thumbs_val = int(thumbs_up) if thumbs_up else 0
+            s["thumbs_up_list"].append(thumbs_val)
+            s["total_thumbs_up"] += thumbs_val
+        except Exception:
+            s["thumbs_up_list"].append(0)
+
         if at:
             if s["first_review_date"] is None or at < s["first_review_date"]:
                 s["first_review_date"] = at
@@ -69,6 +80,12 @@ def compute_app_kpis(rows):
         count = s["reviews_count"]
         avg = s["score_sum"] / count if count else None
         low_pct = (s["low_count"] / count) * 100 if count else None
+        
+        # Calculate engagement metrics
+        thumbs_list = s["thumbs_up_list"]
+        median_thumbs = sorted(thumbs_list)[len(thumbs_list) // 2] if thumbs_list else 0
+        avg_thumbs = s["total_thumbs_up"] / count if count else 0
+        
         out_rows.append(
             {
                 "app_id": app_id,
@@ -82,6 +99,9 @@ def compute_app_kpis(rows):
                 "last_review_date": s["last_review_date"].date().isoformat()
                 if s["last_review_date"]
                 else None,
+                "total_thumbs_up": s["total_thumbs_up"],
+                "avg_thumbs_up": round(avg_thumbs, 2),
+                "median_thumbs_up": median_thumbs,
             }
         )
 
@@ -143,6 +163,9 @@ def main():
             "low_rating_pct",
             "first_review_date",
             "last_review_date",
+            "total_thumbs_up",
+            "avg_thumbs_up",
+            "median_thumbs_up",
         ],
     )
     write_csv(
