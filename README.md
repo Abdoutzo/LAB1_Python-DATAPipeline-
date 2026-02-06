@@ -40,6 +40,8 @@ Serving layer outputs:
 
 Dashboard:
 - `data/processed/dashboard.png`
+  <img width="839" height="728" alt="image" src="https://github.com/user-attachments/assets/14a5567f-16f1-463b-a69e-e55428b01b17" />
+
 
 
 ## How to run
