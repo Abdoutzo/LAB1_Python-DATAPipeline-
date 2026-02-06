@@ -51,6 +51,7 @@ def compute_app_kpis(rows):
                 "total_thumbs_up": 0,
                 "review_lengths": [],
                 "empty_review_count": 0,
+                "ratings_list": [],
             }
 
         s = stats[app_id]
@@ -59,6 +60,7 @@ def compute_app_kpis(rows):
         try:
             score_val = int(score)
             s["score_sum"] += score_val
+            s["ratings_list"].append(score_val)
             if score_val <= 2:
                 s["low_count"] += 1
         except Exception:
@@ -99,6 +101,18 @@ def compute_app_kpis(rows):
         avg_review_length = sum(s["review_lengths"]) / len(s["review_lengths"]) if s["review_lengths"] else 0
         empty_review_pct = (s["empty_review_count"] / count) * 100 if count else 0
         
+        # Calculate trend metrics
+        rating_std_dev = 0.0
+        if len(s["ratings_list"]) > 1:
+            mean = sum(s["ratings_list"]) / len(s["ratings_list"])
+            variance = sum((x - mean) ** 2 for x in s["ratings_list"]) / len(s["ratings_list"])
+            rating_std_dev = variance ** 0.5
+        
+        review_velocity = 0.0
+        if s["first_review_date"] and s["last_review_date"]:
+            days_active = (s["last_review_date"] - s["first_review_date"]).days
+            review_velocity = count / days_active if days_active > 0 else count
+        
         out_rows.append(
             {
                 "app_id": app_id,
@@ -117,6 +131,8 @@ def compute_app_kpis(rows):
                 "median_thumbs_up": median_thumbs,
                 "avg_review_length": round(avg_review_length, 1),
                 "empty_review_pct": round(empty_review_pct, 2),
+                "rating_std_dev": round(rating_std_dev, 3),
+                "review_velocity": round(review_velocity, 2),
             }
         )
 
@@ -183,6 +199,8 @@ def main():
             "median_thumbs_up",
             "avg_review_length",
             "empty_review_pct",
+            "rating_std_dev",
+            "review_velocity",
         ],
     )
     write_csv(
