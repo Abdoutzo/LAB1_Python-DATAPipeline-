@@ -112,14 +112,7 @@ Rapport généré:
 
 ### 4.1 Fichiers CSV de stress test
 
-Dans le PDF, ces fichiers sont indiqués comme **fournis** ("you are provided ...").  
-Pour que le repo soit exécutable directement, nous les avons placés dans `data/raw/`:
-- `note_taking_ai_reviews_batch2.csv`
-- `note_taking_ai_reviews_schema_drift.csv`
-- `note_taking_ai_reviews_dirty.csv`
-- `note_taking_ai_apps_updated.csv`
 
-Si une version officielle différente est donnée pendant le cours, il suffit de remplacer ces 4 fichiers (mêmes noms) puis de relancer `python src/stress_test.py`.
 
 ### 4.2 Résultat global de notre dernière exécution
 
