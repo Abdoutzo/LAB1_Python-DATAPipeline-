@@ -1,5 +1,7 @@
 # Lab 1 - Python Data Pipeline
 
+Abderrazzak OUTZOULA & Badrdine saadioui
+
 This repository contains a small, end-to-end data pipeline built in Python.  
 The goal is to collect raw data from Google Play (AI note-taking apps), clean it, and produce analytics-ready outputs plus a lightweight dashboard.
 
