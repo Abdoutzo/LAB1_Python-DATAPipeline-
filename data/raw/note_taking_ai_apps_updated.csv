@@ -1,0 +1,36 @@
+app_id,app_name,developer_name,rating,rating_count,installs,category,price_usd
+com.google.android.apps.labs.language.tailwind,,Google LLC,N/A,128921,"1,000+",Productivity,0
+ai.turbolearn,Turbo AI - Notetaker,Turbo AI,4.7421093,247564,"1,000,000+",Education,0
+com.aisense.otter,OtterAI Transcribe Voice Notes,Otter.ai,4.3064184,25900,"5,000,000+",Productivity,0
+com.codespaceapps.meetingtranscriber,Smart Noter - AI Note Taker,Deep Flow Apps,4.340807,63415,"5,000,000+",Productivity,0
+io.labhouse.audioapp,Summary - AI Note Taker,Labhouse Mobile,4.7417216,27340,"500,000+",Productivity,0
+com.meetgeek.assistant,AI Transcribe. Speech to Text,MeetGeek: AI Note Taker. Transcribe Speech to Text,4.402299,915,"100,000+",Productivity,0
+com.yygg.note.app,"Notewise - AI Notes, PDF, Docs",Notewise,4.5930233,24520,"5,000,000+",Productivity,0
+notion.id,"Notion: Notes, Tasks, AI","Notion Labs, Inc.",4.6751223,333778,"1,000+",Productivity,0
+com.recordpro.audiorecord,HiNoter - AI Note Taker,Nieruo Team,N/A,2119,"100,000+",Productivity,0
+com.sota.ainotex,,SotaLabs,4.34,1733,"100,000+",Productivity,0
+ai.fireflies.mobile,Fireflies: AI notetaker,Fireflies.ai,4.63,4168,"100,000+",Productivity,0
+ai.plaud.android.plaud,Plaud: AI Note Taker,PLAUD LLC,4.615819,7768,"100,000+",Tools,0
+ai.meeting.app,Meeting.ai: AI Visual Notes,Meeting.ai,4.59,12065,"100,000+",Productivity,0
+com.studocu.app,Studocu: AI Notes & Summaries,Studocu,4.58,21592,"1,000,000+",Education,0
+com.ma.waveapp,Wave AI Note Taker & Recorder,Mohrer Associates,4.5547447,1971,"1,000+",Productivity,0
+ai.notes.notebook,HyNote: AI Notebook LLM Notes,Turing Intelligence,4.4059405,3360,"100,000+",Productivity,0
+com.microsoft.office.onenote,Microsoft OneNote: Save Notes,Microsoft Corporation,N/A,1461051,"500,000,000+",Productivity,0
+ai.note.notepad.memo.journal.freenote,Freenotes - Notes Taking & PDF,Freenotes Inc,4.51,5799,"500,000+",Productivity,0
+com.feraset.ainote,,FERASET,4.287129,1589,"10,000+",Education,0
+com.imemoapp,iMemo AI Note Taker Transcribe,Ratel,4.3703704,105,"5,000+",Productivity,0
+com.google.android.keep,Google Keep - Notes and lists,Google LLC,4.6933074,2261965,"1,000,000,000+",Productivity,0
+com.hubx.noteai,Note AI: Smart Note Taker,HubX,4.3846154,7208,"1,000+",Productivity,0
+ai.krisp.krispMobile,Krisp AI Meeting Note Taker,"Krisp Technologies, Inc.",3.7413793,290,"50,000+",Productivity,0
+com.evernote,Evernote - Note Organizer,Evernote by Bending Spoons,3.567837,1850388,"100,000,000+",Productivity,0
+app.coconote,Coconote - AI Note Taker,Quizlet Inc.,N/A,2117,"100,000+",Education,0
+com.myscript.nebo,MyScript Notes (Nebo),MyScript,4.4573646,31187,"1,000,000+",Productivity,0
+com.goodnotes.android.app,"Goodnotes: AI Notes, Docs, PDF",Goodnotes,3.7346938,25937,"1,000,000+",Productivity,0
+com.inoid.notter.ai.note.taker,,iNoid Solutions,,,"1,000+",Productivity,0
+com.fluidtouch.noteshelf3,Noteshelf 3: Digital Notes,Fluid Touch,4.2788463,11363,"1,000+",Productivity,0
+com.langogo.transcribe,Notta-Transcribe Audio to Text,NOTTA PTE. LTD.,3.963964,18337,"1,000,000+",Productivity,0
+com.google.android.apps.labs.language.tailwind,Google NotebookLM,Google LLC,4.827526,128921,"10,000,000+",Productivity,0
+ai.turbolearn,Turbo AI - Notetaker,Turbo AI,4.7421093,247564,"1,000,000+",Education,0
+com.aisense.otter,OtterAI Transcribe Voice Notes,Otter.ai,4.3064184,25900,"5,000,000+",Productivity,0
+com.codespaceapps.meetingtranscriber,Smart Noter - AI Note Taker,Deep Flow Apps,4.340807,63415,"5,000,000+",Productivity,0
+,Broken App Row,,bad_rating,unknown,many,,free

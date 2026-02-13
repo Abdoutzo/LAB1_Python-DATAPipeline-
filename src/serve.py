@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+import re
 
 
 PROCESSED_DIR = Path("data/processed")
@@ -7,6 +8,39 @@ REVIEWS_IN = PROCESSED_DIR / "reviews.csv"
 
 APP_KPI_OUT = PROCESSED_DIR / "app_kpis.csv"
 DAILY_KPI_OUT = PROCESSED_DIR / "daily_kpis.csv"
+SENTIMENT_KPI_OUT = PROCESSED_DIR / "sentiment_mismatch_kpis.csv"
+
+POSITIVE_WORDS = {
+    "good",
+    "great",
+    "excellent",
+    "awesome",
+    "amazing",
+    "love",
+    "helpful",
+    "best",
+    "fast",
+    "useful",
+    "perfect",
+    "easy",
+}
+
+NEGATIVE_WORDS = {
+    "bad",
+    "poor",
+    "terrible",
+    "awful",
+    "worst",
+    "hate",
+    "bug",
+    "bugs",
+    "slow",
+    "broken",
+    "crash",
+    "crashes",
+    "problem",
+    "useless",
+}
 
 
 def load_reviews():
@@ -50,17 +84,31 @@ def compute_review_velocity(counts, days_active):
     return velocity
 
 
+def sentiment_label(text):
+    if not isinstance(text, str):
+        return "neutral"
+    tokens = re.findall(r"[a-z']+", text.lower())
+    if not tokens:
+        return "neutral"
+    pos = sum(1 for token in tokens if token in POSITIVE_WORDS)
+    neg = sum(1 for token in tokens if token in NEGATIVE_WORDS)
+    if pos > neg:
+        return "positive"
+    if neg > pos:
+        return "negative"
+    return "neutral"
+
+
 def compute_app_kpis(df):
     g = df.groupby("app_id", dropna=False)
 
     reviews_count = g.size().rename("reviews_count")
     app_name = g["app_name"].first().rename("app_name")
 
-    score_sum = g["score"].sum().rename("score_sum")
+    valid_score_count = g["score"].count().rename("valid_score_count")
+    avg_rating = g["score"].mean().rename("avg_rating")
     low_count = g["score"].apply(lambda s: (s <= 2).sum()).rename("low_count")
-
-    avg_rating = (score_sum / reviews_count).rename("avg_rating")
-    low_rating_pct = (low_count / reviews_count * 100).rename("low_rating_pct")
+    low_rating_pct = (low_count / valid_score_count * 100).rename("low_rating_pct")
 
     total_thumbs_up = g["thumbsUpCount"].sum().rename("total_thumbs_up")
     avg_thumbs_up = (total_thumbs_up / reviews_count).rename("avg_thumbs_up")
@@ -116,8 +164,8 @@ def compute_app_kpis(df):
     app_kpis["rating_std_dev"] = app_kpis["rating_std_dev"].round(3)
     app_kpis["review_velocity"] = app_kpis["review_velocity"].round(2)
 
-    app_kpis["total_thumbs_up"] = app_kpis["total_thumbs_up"].astype(int)
-    app_kpis["median_thumbs_up"] = app_kpis["median_thumbs_up"].astype(int)
+    app_kpis["total_thumbs_up"] = app_kpis["total_thumbs_up"].fillna(0).astype(int)
+    app_kpis["median_thumbs_up"] = app_kpis["median_thumbs_up"].fillna(0).astype(int)
 
     app_kpis = app_kpis.reset_index()
     app_kpis = app_kpis.sort_values(["app_name", "app_id"], na_position="last")
@@ -151,8 +199,7 @@ def compute_daily_kpis(df):
     g = daily.groupby("date", dropna=False)
 
     daily_reviews = g.size().rename("daily_reviews")
-    score_sum = g["score"].sum().rename("score_sum")
-    daily_avg_rating = (score_sum / daily_reviews).rename("daily_avg_rating")
+    daily_avg_rating = g["score"].mean().rename("daily_avg_rating")
 
     daily_kpis = pd.concat([daily_reviews, daily_avg_rating], axis=1).reset_index()
     daily_kpis["daily_avg_rating"] = daily_kpis["daily_avg_rating"].round(4)
@@ -162,16 +209,87 @@ def compute_daily_kpis(df):
     return daily_kpis[["date", "daily_reviews", "daily_avg_rating"]]
 
 
+def compute_sentiment_mismatch_kpis(df):
+    reviews = df.copy()
+    reviews["sentiment_label"] = reviews["content"].apply(sentiment_label)
+    reviews["mismatch_flag"] = (
+        ((reviews["sentiment_label"] == "negative") & (reviews["score"] >= 4))
+        | ((reviews["sentiment_label"] == "positive") & (reviews["score"] <= 2))
+    ).astype(int)
+    reviews["has_text"] = reviews["content"].str.strip().ne("")
+
+    scoped = reviews[reviews["score"].notna()].copy()
+    if scoped.empty:
+        return pd.DataFrame(
+            columns=[
+                "app_id",
+                "app_name",
+                "reviews_with_text",
+                "positive_reviews",
+                "negative_reviews",
+                "neutral_reviews",
+                "mismatch_reviews",
+                "mismatch_pct",
+            ]
+        )
+
+    g = scoped.groupby("app_id", dropna=False)
+    app_name = g["app_name"].first().rename("app_name")
+    reviews_with_text = g["has_text"].sum().rename("reviews_with_text")
+    positive_reviews = g["sentiment_label"].apply(
+        lambda s: (s == "positive").sum()
+    ).rename("positive_reviews")
+    negative_reviews = g["sentiment_label"].apply(
+        lambda s: (s == "negative").sum()
+    ).rename("negative_reviews")
+    neutral_reviews = g["sentiment_label"].apply(
+        lambda s: (s == "neutral").sum()
+    ).rename("neutral_reviews")
+    mismatch_reviews = g["mismatch_flag"].sum().rename("mismatch_reviews")
+    mismatch_pct = (mismatch_reviews / reviews_with_text * 100).rename("mismatch_pct")
+
+    out = pd.concat(
+        [
+            app_name,
+            reviews_with_text,
+            positive_reviews,
+            negative_reviews,
+            neutral_reviews,
+            mismatch_reviews,
+            mismatch_pct,
+        ],
+        axis=1,
+    ).reset_index()
+
+    out["mismatch_pct"] = out["mismatch_pct"].fillna(0).round(2)
+    out = out.sort_values(["mismatch_pct", "mismatch_reviews"], ascending=[False, False])
+    return out[
+        [
+            "app_id",
+            "app_name",
+            "reviews_with_text",
+            "positive_reviews",
+            "negative_reviews",
+            "neutral_reviews",
+            "mismatch_reviews",
+            "mismatch_pct",
+        ]
+    ]
+
+
 def main():
     df = load_reviews()
     app_kpis = compute_app_kpis(df)
     daily_kpis = compute_daily_kpis(df)
+    sentiment_kpis = compute_sentiment_mismatch_kpis(df)
 
     app_kpis.to_csv(APP_KPI_OUT, index=False)
     daily_kpis.to_csv(DAILY_KPI_OUT, index=False)
+    sentiment_kpis.to_csv(SENTIMENT_KPI_OUT, index=False)
 
     print(f"Wrote {APP_KPI_OUT}")
     print(f"Wrote {DAILY_KPI_OUT}")
+    print(f"Wrote {SENTIMENT_KPI_OUT}")
 
 
 if __name__ == "__main__":

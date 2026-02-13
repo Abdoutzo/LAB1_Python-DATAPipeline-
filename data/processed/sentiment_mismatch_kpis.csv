@@ -1,0 +1,31 @@
+app_id,app_name,reviews_with_text,positive_reviews,negative_reviews,neutral_reviews,mismatch_reviews,mismatch_pct
+com.evernote,Evernote - Note Organizer,1000,227,137,636,149,14.9
+ai.krisp.krispMobile,Krisp AI Meeting Note Taker,63,18,13,32,5,7.94
+com.goodnotes.android.app,"Goodnotes: AI Notes, Docs, PDF",1000,255,182,563,63,6.3
+com.langogo.transcribe,Notta-Transcribe Audio to Text,1000,363,105,532,59,5.9
+com.google.android.keep,Google Keep - Notes and lists,1000,476,60,464,58,5.8
+com.myscript.nebo,MyScript Notes (Nebo),1000,451,72,477,58,5.8
+ai.notes.notebook,HyNote: AI Notebook LLM Notes,254,117,6,131,13,5.12
+com.aisense.otter,OtterAI Transcribe Voice Notes,1000,387,76,537,51,5.1
+com.sota.ainotex,NoteX: AI Notes & Meetings,106,46,2,58,5,4.72
+com.yygg.note.app,"Notewise - AI Notes, PDF, Docs",1000,465,66,469,45,4.5
+app.coconote,Coconote - AI Note Taker,164,81,6,77,7,4.27
+com.ma.waveapp,Wave AI Note Taker & Recorder,259,105,21,133,11,4.25
+notion.id,"Notion: Notes, Tasks, AI",1000,480,74,446,41,4.1
+io.labhouse.audioapp,Summary - AI Note Taker,1000,567,24,409,40,4.0
+com.feraset.ainote,AI Note Taker - Meeting Notes,75,25,1,49,3,4.0
+ai.fireflies.mobile,Fireflies: AI notetaker,291,156,5,130,11,3.78
+com.microsoft.office.onenote,Microsoft OneNote: Save Notes,1000,474,81,445,37,3.7
+com.codespaceapps.meetingtranscriber,Smart Noter - AI Note Taker,999,454,34,512,36,3.6
+com.hubx.noteai,Note AI: Smart Note Taker,489,217,29,243,17,3.48
+ai.meeting.app,Meeting.ai: AI Visual Notes,128,51,1,76,4,3.12
+com.meetgeek.assistant,AI Transcribe. Speech to Text,70,32,2,36,2,2.86
+ai.turbolearn,Turbo AI - Notetaker,1000,586,18,396,27,2.7
+com.fluidtouch.noteshelf3,Noteshelf 3: Digital Notes,1000,540,50,410,26,2.6
+com.studocu.app,Studocu: AI Notes & Summaries,1000,588,25,387,21,2.1
+ai.plaud.android.plaud,Plaud: AI Note Taker,1000,591,17,392,15,1.5
+com.google.android.apps.labs.language.tailwind,Google NotebookLM,1000,596,16,388,15,1.5
+ai.note.notepad.memo.journal.freenote,Freenotes - Notes Taking & PDF,952,639,9,304,12,1.26
+com.imemoapp,iMemo AI Note Taker Transcribe,11,6,0,5,0,0.0
+com.inoid.notter.ai.note.taker,NotterAI - AI Note Taker,6,6,0,0,0,0.0
+com.recordpro.audiorecord,HiNoter - AI Note Taker,30,17,1,12,0,0.0

@@ -1,76 +1,177 @@
-# Lab 1 - Python Data Pipeline
+# Lab 1 - Python-only Data Pipeline
 
-Abderrazzak OUTZOULA & Badrdine saadioui
+Abderrazzak OUTZOULA & Badrdine Saadioui
 
-This repository contains a small, end-to-end data pipeline built in Python.  
-The goal is to collect raw data from Google Play (AI note-taking apps), clean it, and produce analytics-ready outputs plus a lightweight dashboard.
+Dans ce rendu, nous présentons le pipeline que nous avons construit pour le Lab 1, en suivant les trois parties du PDF:
+- A. Setup de l'environnement
+- B. Pipeline end-to-end (ingestion -> transformation -> serving -> dashboard)
+- C. Changements de pipeline et stress testing
 
-The pipeline follows the lab steps:
-1) ingestion (raw data),
-2) transformation (cleaned tables),
-3) serving layer (KPIs),
-4) dashboard (consumer view).
+## 1) Structure du projet
 
-
-## Project structure
-
-```
+```text
 data/
-  raw/          # raw JSONL files from the source
-  processed/    # cleaned CSVs + KPI outputs + dashboard image
+  raw/                # fichiers bruts (JSONL + CSV de stress test)
+  processed/          # tables transformées, KPI, rapports qualité et stress
 src/
-  ingest.py     # data acquisition from Google Play
-  transform.py  # cleaning + structuring into tables
-  serve.py      # KPI generation (app-level + daily)
-  dashboard.py  # simple visualization
+  ingest.py           # extraction Google Play (apps + reviews) vers JSONL
+  transform.py        # normalisation des schémas et nettoyage
+  serve.py            # KPI app/jour + KPI contradiction sentiment/note
+  dashboard.py        # génération du dashboard
+  stress_test.py      # exécution automatique de la partie C
+README.md             # documentation principale
+Lab1_PythonDataPipeline.pdf
 ```
 
+## 2) Partie A - Environnement
 
-## What the pipeline produces
+Nous avons travaillé avec Python 3.7+ dans un environnement virtuel dédié.
 
-Raw data (as-is):
+```powershell
+python -m venv .venv
+.\.venv\Scripts\activate
+python -m pip install --upgrade pip
+python -m pip install google-play-scraper pandas matplotlib
+```
+
+## 3) Partie B - Pipeline end-to-end
+
+### 3.1 Ingestion
+
+```powershell
+python src/ingest.py
+```
+
+Sorties produites:
 - `data/raw/apps.jsonl`
 - `data/raw/reviews.jsonl`
 
-Cleaned tables:
-- `data/processed/apps.csv`
-- `data/processed/reviews.csv`
+Dans cette étape, nous gardons les données brutes telles quelles (sans transformation), avec récupération paginée des reviews.
 
-Serving layer outputs:
+### 3.2 Transformation
+
+```powershell
+python src/transform.py
+```
+
+Problèmes de données brutes que nous avons traités:
+1. Champs imbriqués et non tabulaires.
+2. Types incohérents (nombres stockés en texte, tokens null, etc.).
+3. Clés manquantes ou noms de colonnes variables selon la source.
+4. Formats de date multiples et parfois invalides.
+5. Doublons d'identifiants (`appId`, `reviewId`).
+6. Reviews qui référencent des applications absentes du catalogue.
+7. Évolution du schéma (schema drift), surtout sur les reviews.
+
+Sorties transformées demandées par le PDF:
+- `data/processed/apps.csv` avec  
+  `appId, title, developer, score, ratings, installs, genre, price`
+- `data/processed/reviews.csv` avec  
+  `app_id, app_name, reviewId, userName, score, content, thumbsUpCount, at`
+
+Sortie qualité ajoutée:
+- `data/processed/quality_report.json`
+
+### 3.3 Serving layer
+
+```powershell
+python src/serve.py
+```
+
+Sorties de serving demandées:
 - `data/processed/app_kpis.csv`
 - `data/processed/daily_kpis.csv`
 
-Dashboard:
-- `data/processed/dashboard.png`
-  <img width="839" height="728" alt="image" src="https://github.com/user-attachments/assets/14a5567f-16f1-463b-a69e-e55428b01b17" />
+Sortie supplémentaire pour la question métier de la partie C:
+- `data/processed/sentiment_mismatch_kpis.csv`
 
-
-## How to run
-
-Create and activate a virtual environment, then:
+### 3.4 Dashboard
 
 ```powershell
-python -m pip install google-play-scraper matplotlib pandas
+python src/dashboard.py
 ```
 
-Run the pipeline step by step:
+Sortie:
+- `data/processed/dashboard.png`
+
+Ce que montre le dashboard (en 2-3 phrases):  
+Nous y comparons les apps selon le volume d'avis et la note moyenne, ce qui permet d'identifier rapidement les apps qui performent bien ou mal.  
+Nous visualisons aussi l'évolution quotidienne des notes pour repérer une amélioration ou une dégradation de la satisfaction utilisateur.  
+Enfin, des graphiques complémentaires montrent les écarts d'engagement entre applications.
+
+## 4) Partie C - Stress testing
+
+Nous avons automatisé les scénarios de la partie C avec:
+
+```powershell
+python src/stress_test.py
+```
+
+Rapport généré:
+- `data/processed/stress_test_report.md`
+
+### 4.1 Fichiers CSV de stress test
+
+Dans le PDF, ces fichiers sont indiqués comme **fournis** ("you are provided ...").  
+Pour que le repo soit exécutable directement, nous les avons placés dans `data/raw/`:
+- `note_taking_ai_reviews_batch2.csv`
+- `note_taking_ai_reviews_schema_drift.csv`
+- `note_taking_ai_reviews_dirty.csv`
+- `note_taking_ai_apps_updated.csv`
+
+Si une version officielle différente est donnée pendant le cours, il suffit de remplacer ces 4 fichiers (mêmes noms) puis de relancer `python src/stress_test.py`.
+
+### 4.2 Résultat global de notre dernière exécution
+
+Les 4 scénarios sont passés avec le statut `ok` dans `data/processed/stress_test_report.md`.
+
+### 4.3 Réponses aux questions de la partie C (comme demandé)
+
+1. New Reviews Batch
+- Changements de code: limités et localisés (`src/transform.py`, `src/serve.py`, `src/stress_test.py`).
+- Full refresh: oui, explicite (les sorties sont régénérées à chaque run).
+- Doublons: détection et suppression par `reviewId` (`5` doublons sur notre run).
+- Apps inconnues: reviews conservées, app potentiellement non résolue, cas comptés (`5` sur notre run).
+
+2. Schema Drift in Reviews
+- Dépendance aux colonnes: centralisée dans `normalize_review_row` (`src/transform.py`).
+- Échec explicite/silencieux: avec notre mapping actuel, le scénario est stable (`ok`).
+- Étendue des changements: principalement locale à la transformation.
+
+3. Dirty and Inconsistent Data Records
+- Notes/dates invalides: converties en null pour éviter des agrégations incorrectes.
+- Gestion des lignes problématiques: on conserve les lignes, on neutralise les champs invalides, on trace l'impact.
+- Visibilité qualité: `quality_report.json` remonte les anomalies (`23` scores invalides, `17` timestamps invalides sur notre run).
+
+4. Updated Applications Metadata
+- Doublons d'apps: les doublons `appId` sont ignorés (`4` sur notre run).
+- Jointure reviews/apps: jointure clé `app_id`; les ids inconnus sont conservés et comptés.
+- Impact aval: visible dans les métriques (ex: `1187` app ids inconnus dans ce scénario).
+
+5. New Business Logic Stress Test (consumer-driven change)
+- Suffisance des sorties initiales: non, il fallait ajouter une logique dédiée.
+- Ajout réalisé: `data/processed/sentiment_mismatch_kpis.csv` via `src/serve.py`.
+- Positionnement de la logique: dérivation de feature + agrégation au niveau serving.
+- Impact architecture: changements surtout sur `transform` et `serve` (dashboard optionnel).
+
+## 5) Reproductibilité
+
+- Nous ne modifions jamais les fichiers bruts pendant transform/serve/stress.
+- Le pipeline fonctionne en full refresh.
+- Les indicateurs qualité sont tracés dans `data/processed/quality_report.json`.
+
+## 6) Commandes de reproduction
 
 ```powershell
 python src/ingest.py
 python src/transform.py
 python src/serve.py
 python src/dashboard.py
+python src/stress_test.py
 ```
 
-
-## Notes
-
-- The raw files are kept untouched to preserve lineage and reproducibility.
-- The cleaned tables are designed to be joinable (`appId` / `app_id`) and analytics-ready.
-- The KPI layer answers the lab questions: best/worst apps, trend over time, and review volume.
-- Review ingestion paginates results and writes incrementally to avoid data loss during long runs.
-
 ## Feedback (addressed)
+
 - Reviews ingestion now paginates and appends in batches for safer collection.
 - KPIs are computed via pandas groupby aggregations for simpler, faster code.
 - A dashboard screenshot is included in the README.

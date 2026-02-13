@@ -1,0 +1,31 @@
+{
+  "inputs": {
+    "apps_path": "data\\raw\\apps.jsonl",
+    "reviews_paths": [
+      "data\\raw\\reviews.jsonl"
+    ]
+  },
+  "apps": {
+    "input_rows": 30,
+    "output_rows": 30,
+    "duplicate_app_ids": 0,
+    "missing_app_id": 0,
+    "missing_title": 0,
+    "invalid_score": 0,
+    "invalid_ratings": 0,
+    "invalid_installs": 0,
+    "invalid_price": 0
+  },
+  "reviews": {
+    "input_rows": 18898,
+    "output_rows": 18898,
+    "duplicate_review_ids": 0,
+    "missing_review_id": 0,
+    "missing_app_id": 0,
+    "unknown_app_id": 0,
+    "invalid_score": 0,
+    "invalid_timestamp": 0,
+    "empty_content": 1
+  },
+  "generated_at_utc": "2026-02-13 16:28:43"
+}
