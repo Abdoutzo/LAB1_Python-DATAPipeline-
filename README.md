@@ -93,6 +93,8 @@ python src/dashboard.py
 
 Sortie:
 - `data/processed/dashboard.png`
+<img width="837" height="723" alt="image" src="https://github.com/user-attachments/assets/7179e9a1-5800-4650-9166-dd1d86468034" />
+
 
 Ce que montre le dashboard (en 2-3 phrases):  
 Nous y comparons les apps selon le volume d'avis et la note moyenne, ce qui permet d'identifier rapidement les apps qui performent bien ou mal.  
