@@ -1,0 +1,87 @@
+version: 2
+
+models:
+  - name: dim_apps
+    description: "Dimension des applications pour l'analyse des avis Play Store."
+    columns:
+      - name: app_sk
+        data_tests:
+          - not_null
+          - unique
+      - name: app_id
+        data_tests:
+          - not_null
+          - unique
+      - name: app_name
+        data_tests:
+          - not_null
+
+  - name: dim_dates
+    description: "Dimension calendaire derivee des dates de reviews."
+    columns:
+      - name: date_sk
+        data_tests:
+          - not_null
+          - unique
+      - name: date_day
+        data_tests:
+          - not_null
+          - unique
+
+  - name: dim_reviewers
+    description: "Dimension des auteurs de reviews (normalisation du nom et valeur Unknown)."
+    columns:
+      - name: reviewer_sk
+        data_tests:
+          - not_null
+          - unique
+      - name: reviewer_name
+        data_tests:
+          - not_null
+
+  - name: fct_playstore_reviews
+    description: "Fact table au grain review (une ligne = un avis utilisateur)."
+    columns:
+      - name: review_id
+        data_tests:
+          - not_null
+          - unique
+      - name: app_sk
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_apps')
+                field: app_sk
+      - name: date_sk
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_dates')
+                field: date_sk
+      - name: reviewer_sk
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_reviewers')
+                field: reviewer_sk
+      - name: rating_score
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+      - name: low_rating_flag
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+      - name: review_count
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1]

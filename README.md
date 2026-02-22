@@ -282,7 +282,7 @@ L'idee etait de separer proprement:
 ### 8.2 Structure code du Lab 2
 
 ```text
-../LAB 2/
+LAB 2/
   docs/
     Lab2_dbtDuckDbETL.pdf
   LAB2_STEP_BY_STEP_PLAN.md
@@ -380,7 +380,7 @@ Lecture:
 
 ### 8.7 Commandes de reproduction (Lab 2)
 
-Depuis `../LAB 2/lab2_playstore`:
+Depuis `LAB 2/lab2_playstore`:
 
 ```powershell
 ..\.venv_lab2\Scripts\python.exe -m dbt.cli.main debug --profiles-dir . --project-dir .
@@ -398,8 +398,8 @@ Note:
 
 Pour garder un historique propre et reutilisable pour le rapport:
 - journal global Lab 1: `LAB_PROGRESS_LOG.md`;
-- journal detaille Lab 2: `../LAB 2/LAB2_PROGRESS_LOG.md`;
-- plan pas a pas Lab 2: `../LAB 2/LAB2_STEP_BY_STEP_PLAN.md`.
+- journal detaille Lab 2: `LAB 2/LAB2_PROGRESS_LOG.md`;
+- plan pas a pas Lab 2: `LAB 2/LAB2_STEP_BY_STEP_PLAN.md`.
 
 ### 8.9 Conclusion generale (Labs 1 + 2)
 

@@ -1,0 +1,76 @@
+version: 2
+
+models:
+  - name: stg_playstore_apps
+    description: "Staging propre des applications Play Store (noms standardises, types castes, nettoyage minimal)."
+    columns:
+      - name: app_sk
+        description: "Surrogate key de l'application (hash de app_id)."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: app_id
+        description: "Business key de l'application."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: app_name
+        description: "Nom de l'application."
+        data_tests:
+          - not_null
+
+      - name: store_score
+        description: "Score moyen Play Store de l'application."
+
+  - name: stg_playstore_reviews
+    description: "Staging propre des avis utilisateurs Play Store (grain = un avis)."
+    columns:
+      - name: review_sk
+        description: "Surrogate key de l'avis (hash de review_id)."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: review_id
+        description: "Business key de l'avis."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: app_id
+        description: "Application concernee par l'avis."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_playstore_apps')
+                field: app_id
+
+      - name: app_sk
+        description: "Surrogate key applicative de l'avis."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_playstore_apps')
+                field: app_sk
+
+      - name: rating_score
+        description: "Note de l'utilisateur."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+
+      - name: thumbs_up_count
+        description: "Nombre de votes utiles."
+        data_tests:
+          - not_null
+
+      - name: review_ts
+        description: "Timestamp de publication de l'avis."
+        data_tests:
+          - not_null

@@ -1,0 +1,7 @@
+lab2_playstore:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "data/warehouse/lab2_playstore.duckdb"
+      threads: 4
