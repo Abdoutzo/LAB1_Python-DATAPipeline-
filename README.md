@@ -76,6 +76,8 @@ python src/dashboard.py
 Sortie:
 - `data/processed/dashboard.png`
 
+![Dashboard Lab 1](data/processed/dashboard.png)
+
 En lecture rapide, le dashboard met en regard le volume de reviews et la note moyenne pour identifier les applications qui performent bien ou mal. Il montre aussi l'evolution quotidienne des notes pour voir si la satisfaction utilisateur s'ameliore ou se degrade dans le temps. Enfin, des indicateurs d'engagement (thumbs up, longueur moyenne des avis, volatilite) permettent de comparer la dynamique des applications.
 
 ## 4) Reproductibilite
