@@ -10,3 +10,11 @@ __pycache__/
 # IDE settings
 .vscode/
 .idea/
+
+# Runtime artifacts
+logs/
+
+# Source documents not for delivery commits
+Lab1_PythonDataPipeline.pdf
+Data_Engineering_-_S1-2_-_Resources.zip
+resources/

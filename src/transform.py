@@ -32,6 +32,7 @@ TIMESTAMP_FORMATS = [
     "%Y-%m-%d %H:%M:%S",
     "%Y-%m-%dT%H:%M:%S",
     "%Y/%m/%d %H:%M:%S",
+    "%Y/%m/%d %H:%M",
     "%Y-%m-%d",
     "%Y/%m/%d",
     "%m/%d/%Y %H:%M:%S",
@@ -351,7 +352,18 @@ def normalize_review_row(obj, app_name_by_id, stats):
         coalesce(row, ["thumbsUpCount", "thumbs_up_count", "thumbsUp", "likes"])
     )
     at, bad_timestamp = normalize_timestamp(
-        coalesce(row, ["at", "date", "created_at", "timestamp", "time", "review_date"])
+        coalesce(
+            row,
+            [
+                "at",
+                "date",
+                "created_at",
+                "timestamp",
+                "time",
+                "review_date",
+                "review_time",
+            ],
+        )
     )
 
     if review_id is None:

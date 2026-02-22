@@ -3,12 +3,14 @@ import json
 import os
 import subprocess
 import sys
-from datetime import datetime
+import zipfile
 from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 RAW_DIR = ROOT_DIR / "data" / "raw"
+RESOURCES_DIR = ROOT_DIR / "resources" / "session1_2_extracted"
+RESOURCES_ZIP = ROOT_DIR / "Data_Engineering_-_S1-2_-_Resources.zip"
 PROCESSED_DIR = ROOT_DIR / "data" / "processed"
 
 APPS_OUT = PROCESSED_DIR / "apps.csv"
@@ -19,37 +21,43 @@ SENTIMENT_KPI_OUT = PROCESSED_DIR / "sentiment_mismatch_kpis.csv"
 QUALITY_REPORT_OUT = PROCESSED_DIR / "quality_report.json"
 REPORT_OUT = PROCESSED_DIR / "stress_test_report.md"
 
-DEFAULT_APPS = RAW_DIR / "apps.jsonl"
-DEFAULT_REVIEWS = [RAW_DIR / "reviews.jsonl"]
+BASE_APPS = RAW_DIR / "apps.jsonl"
+BASE_REVIEWS = [RAW_DIR / "reviews.jsonl"]
+REQUIRED_RESOURCE_FILES = [
+    "note_taking_ai_reviews_batch2.csv",
+    "note_taking_ai_reviews_schema_drift.csv",
+    "note_taking_ai_reviews_dirty.csv",
+    "note_taking_ai_apps_updated.csv",
+]
 
 SCENARIOS = [
     {
         "id": "new_reviews_batch",
         "title": "1) New Reviews Batch",
-        "apps_path": DEFAULT_APPS,
-        "reviews_paths": [RAW_DIR / "note_taking_ai_reviews_batch2.csv"],
-        "required_files": [RAW_DIR / "note_taking_ai_reviews_batch2.csv"],
+        "apps_path": BASE_APPS,
+        "reviews_paths": [RESOURCES_DIR / "note_taking_ai_reviews_batch2.csv"],
+        "required_files": [RESOURCES_DIR / "note_taking_ai_reviews_batch2.csv"],
     },
     {
         "id": "schema_drift_reviews",
         "title": "2) Schema Drift in Reviews",
-        "apps_path": DEFAULT_APPS,
-        "reviews_paths": [RAW_DIR / "note_taking_ai_reviews_schema_drift.csv"],
-        "required_files": [RAW_DIR / "note_taking_ai_reviews_schema_drift.csv"],
+        "apps_path": BASE_APPS,
+        "reviews_paths": [RESOURCES_DIR / "note_taking_ai_reviews_schema_drift.csv"],
+        "required_files": [RESOURCES_DIR / "note_taking_ai_reviews_schema_drift.csv"],
     },
     {
         "id": "dirty_reviews",
         "title": "3) Dirty and Inconsistent Data Records",
-        "apps_path": DEFAULT_APPS,
-        "reviews_paths": [RAW_DIR / "note_taking_ai_reviews_dirty.csv"],
-        "required_files": [RAW_DIR / "note_taking_ai_reviews_dirty.csv"],
+        "apps_path": BASE_APPS,
+        "reviews_paths": [RESOURCES_DIR / "note_taking_ai_reviews_dirty.csv"],
+        "required_files": [RESOURCES_DIR / "note_taking_ai_reviews_dirty.csv"],
     },
     {
         "id": "updated_apps_metadata",
         "title": "4) Updated Applications Metadata",
-        "apps_path": RAW_DIR / "note_taking_ai_apps_updated.csv",
-        "reviews_paths": DEFAULT_REVIEWS,
-        "required_files": [RAW_DIR / "note_taking_ai_apps_updated.csv"],
+        "apps_path": RESOURCES_DIR / "note_taking_ai_apps_updated.csv",
+        "reviews_paths": BASE_REVIEWS,
+        "required_files": [RESOURCES_DIR / "note_taking_ai_apps_updated.csv"],
     },
 ]
 
@@ -64,6 +72,19 @@ def csv_rows(path):
         except StopIteration:
             return 0
         return sum(1 for _ in reader)
+
+
+def ensure_resources():
+    if all((RESOURCES_DIR / name).exists() for name in REQUIRED_RESOURCE_FILES):
+        return
+    if not RESOURCES_ZIP.exists():
+        raise FileNotFoundError(
+            f"Missing stress resources zip: {RESOURCES_ZIP}. "
+            f"Expected files: {', '.join(REQUIRED_RESOURCE_FILES)}"
+        )
+    RESOURCES_DIR.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(RESOURCES_ZIP) as zf:
+        zf.extractall(RESOURCES_DIR)
 
 
 def run_command(cmd, env):
@@ -124,6 +145,40 @@ def summarize_outputs():
     }
 
 
+def summarize_sentiment():
+    if not SENTIMENT_KPI_OUT.exists():
+        return {}
+    rows = []
+    with SENTIMENT_KPI_OUT.open(encoding="utf-8", newline="") as f:
+        for row in csv.DictReader(f):
+            try:
+                row["mismatch_reviews"] = int(float(row.get("mismatch_reviews", 0) or 0))
+            except ValueError:
+                row["mismatch_reviews"] = 0
+            try:
+                row["mismatch_pct"] = float(row.get("mismatch_pct", 0) or 0)
+            except ValueError:
+                row["mismatch_pct"] = 0.0
+            rows.append(row)
+    rows.sort(key=lambda r: (r["mismatch_pct"], r["mismatch_reviews"]), reverse=True)
+    non_zero = [r for r in rows if r["mismatch_reviews"] > 0]
+    top = non_zero[:3]
+    return {
+        "apps_analyzed": len(rows),
+        "apps_with_mismatch": len(non_zero),
+        "total_mismatch_reviews": sum(r["mismatch_reviews"] for r in non_zero),
+        "top_apps": [
+            {
+                "app_id": r.get("app_id"),
+                "app_name": r.get("app_name"),
+                "mismatch_reviews": r["mismatch_reviews"],
+                "mismatch_pct": round(r["mismatch_pct"], 2),
+            }
+            for r in top
+        ],
+    }
+
+
 def run_scenario(scenario):
     missing_files = [str(p) for p in scenario["required_files"] if not p.exists()]
     if missing_files:
@@ -163,21 +218,48 @@ def run_scenario(scenario):
     }
 
 
-def build_markdown(results):
-    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+def run_business_logic():
+    execution = run_pipeline(BASE_APPS, BASE_REVIEWS)
+    if not execution["success"]:
+        return {
+            "id": "business_logic",
+            "title": "5) New Business Logic Stress Test",
+            "status": "failed",
+            "error_step": execution["step"],
+            "error": (execution["stderr"] or execution["stdout"]).strip(),
+            "quality": {},
+            "outputs": {},
+            "sentiment_summary": {},
+        }
+
+    return {
+        "id": "business_logic",
+        "title": "5) New Business Logic Stress Test",
+        "status": "ok",
+        "error_step": "",
+        "error": "",
+        "quality": read_quality(),
+        "outputs": summarize_outputs(),
+        "sentiment_summary": summarize_sentiment(),
+    }
+
+
+def build_markdown(results, business):
     lines = []
     lines.append("# Part C Stress Test Report")
     lines.append("")
-    lines.append(f"Generated at: {now}")
+    lines.append("Input resources:")
+    lines.append(f"- `resources zip`: `{RESOURCES_ZIP}`")
+    lines.append(f"- `baseline apps`: `{BASE_APPS}`")
+    lines.append(f"- `baseline reviews`: `{BASE_REVIEWS[0]}`")
+    lines.append(f"- `stress resources`: `{RESOURCES_DIR}`")
     lines.append("")
-    lines.append("## Scenario Summary")
+    lines.append("## Scenario Summary (1 to 4)")
     lines.append("")
     lines.append(
         "| Scenario | Status | Missing files | Duplicate reviews | Unknown apps in reviews | Invalid scores | Invalid timestamps |"
     )
-    lines.append(
-        "| --- | --- | --- | ---: | ---: | ---: | ---: |"
-    )
+    lines.append("| --- | --- | --- | ---: | ---: | ---: | ---: |")
 
     for result in results:
         reviews_quality = result.get("quality", {}).get("reviews", {})
@@ -194,7 +276,7 @@ def build_markdown(results):
         )
 
     lines.append("")
-    lines.append("## Details")
+    lines.append("## Scenario Details")
     lines.append("")
 
     for result in results:
@@ -227,7 +309,7 @@ def build_markdown(results):
             reviews_q = quality.get("reviews", {})
             lines.append("- Quality counters:")
             lines.append(
-                "  - apps duplicates: {duplicate_app_ids}, missing app_id: {missing_app_id}".format(
+                "  - apps duplicates: {duplicate_app_ids}, missing app_id: {missing_app_id}, invalid score: {invalid_score}".format(
                     **apps_q
                 )
             )
@@ -238,19 +320,51 @@ def build_markdown(results):
             )
         lines.append("")
 
+    lines.append("## Scenario 5 (Consumer-driven business logic)")
+    lines.append("")
+    lines.append(f"- Status: `{business['status']}`")
+    if business["status"] == "failed":
+        lines.append(f"- Failed step: `{business['error_step']}`")
+        lines.append("```text")
+        lines.append(business["error"][:3000])
+        lines.append("```")
+    else:
+        outputs = business.get("outputs", {})
+        if outputs:
+            lines.append(
+                "- Output row counts: apps={apps_rows}, reviews={reviews_rows}, app_kpis={app_kpis_rows}, daily_kpis={daily_kpis_rows}, sentiment_kpis={sentiment_kpis_rows}".format(
+                    **outputs
+                )
+            )
+        sentiment = business.get("sentiment_summary", {})
+        if sentiment:
+            lines.append(
+                "- Sentiment mismatch summary: apps_analyzed={apps_analyzed}, apps_with_mismatch={apps_with_mismatch}, total_mismatch_reviews={total_mismatch_reviews}".format(
+                    **sentiment
+                )
+            )
+            if sentiment.get("top_apps"):
+                lines.append("- Top apps with mismatch:")
+                for app in sentiment["top_apps"]:
+                    lines.append(
+                        "  - {app_name} ({app_id}): {mismatch_reviews} mismatches ({mismatch_pct}%)".format(
+                            **app
+                        )
+                    )
+    lines.append("")
     lines.append("## Notes")
     lines.append("")
-    lines.append("- The pipeline runs as full refresh in each scenario.")
-    lines.append("- No raw file is modified during this process.")
-    lines.append(
-        "- At the end of stress execution, baseline outputs are restored using default raw files."
-    )
+    lines.append("- Full refresh mode is used for every scenario run.")
+    lines.append("- No raw file is edited by the pipeline.")
+    lines.append("- Scenario inputs are taken from `resources/session1_2_extracted`.")
+    lines.append("- If resources are missing, they are re-extracted from the zip.")
+    lines.append("- Baseline outputs are restored at the end via default raw files.")
     lines.append("")
     return "\n".join(lines)
 
 
 def restore_baseline():
-    baseline = run_pipeline(DEFAULT_APPS, DEFAULT_REVIEWS)
+    baseline = run_pipeline(BASE_APPS, BASE_REVIEWS)
     if not baseline["success"]:
         print("Warning: failed to restore baseline outputs.")
         print((baseline["stderr"] or baseline["stdout"]).strip())
@@ -258,8 +372,10 @@ def restore_baseline():
 
 def main():
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    ensure_resources()
     results = [run_scenario(scenario) for scenario in SCENARIOS]
-    REPORT_OUT.write_text(build_markdown(results), encoding="utf-8")
+    business = run_business_logic()
+    REPORT_OUT.write_text(build_markdown(results, business), encoding="utf-8")
     print(f"Wrote {REPORT_OUT}")
     restore_baseline()
 
